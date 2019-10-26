@@ -32,6 +32,7 @@ public class StockWatcher implements EntryPoint {
     private TextBox newSymbolTextBox = new TextBox();
     private Button addStockButton = new Button("Add");
     private Label lastUpdatedLabel = new Label();
+    private Label errorMsgLabel = new Label();
 
     private List<String> stocks = new ArrayList<>();
     private StockPriceServiceAsync stockPriceService = GWT.create(StockPriceService.class);
@@ -57,6 +58,10 @@ public class StockWatcher implements EntryPoint {
         addPanel.setStyleName("addPanel");
 
         // Main panel
+        errorMsgLabel.setStyleName("errorMessage");
+        errorMsgLabel.setVisible(false);
+
+        mainPanel.add(errorMsgLabel);
         mainPanel.add(stocksFlexTable);
         mainPanel.add(addPanel);
         mainPanel.add(lastUpdatedLabel);
@@ -87,12 +92,21 @@ public class StockWatcher implements EntryPoint {
         AsyncCallback<StockPrice[]> asyncCallback = new AsyncCallback<StockPrice[]>() {
             @Override
             public void onFailure(Throwable throwable) {
-                // TODO
+                String error = throwable.getMessage();
+
+                if (throwable instanceof DelistedException) {
+                    error = "Company " + ((DelistedException) throwable).getSymbol() + " was delisted!";
+                }
+
+                errorMsgLabel.setText("Error: " + error);
+                errorMsgLabel.setVisible(true);
             }
 
             @Override
             public void onSuccess(StockPrice[] prices) {
                 updateTable(prices);
+                errorMsgLabel.setText("");
+                errorMsgLabel.setVisible(false);
             }
         };
 
@@ -115,8 +129,7 @@ public class StockWatcher implements EntryPoint {
 
         int row = stocks.indexOf(price.getSymbol()) + 1;
 
-        String priceText = NumberFormat.getFormat("#,##0.00").format(
-                price.getPrice());
+        String priceText = NumberFormat.getFormat("#,##0.00").format(price.getPrice());
         NumberFormat changeFormat = NumberFormat.getFormat("+#,##0.00;-#,##0.00");
         String changeText = changeFormat.format(price.getChange());
         String changePercentText = changeFormat.format(price.getChangePercent());
