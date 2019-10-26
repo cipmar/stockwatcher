@@ -2,6 +2,7 @@ package com.softwaredevelopmentstuff.stockwatcher.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -9,9 +10,13 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DeckLayoutPanel;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -26,7 +31,9 @@ import java.util.List;
 public class StockWatcher implements EntryPoint {
     private static final int REFRESH_INTERVAL = 5000; // ms
 
-    private VerticalPanel mainPanel = new VerticalPanel();
+    private Panel mainLayout = new HorizontalPanel();
+
+    private Panel stocksPanel = new VerticalPanel();
     private FlexTable stocksFlexTable = new FlexTable();
     private HorizontalPanel addPanel = new HorizontalPanel();
     private TextBox newSymbolTextBox = new TextBox();
@@ -34,13 +41,23 @@ public class StockWatcher implements EntryPoint {
     private Label lastUpdatedLabel = new Label();
     private Label errorMsgLabel = new Label();
 
+    private Panel employeesPanel = new VerticalPanel();
+    private Button loadEmployeesButton = new Button("Load employees");
+
     private List<String> stocks = new ArrayList<>();
     private StockPriceServiceAsync stockPriceService = GWT.create(StockPriceService.class);
+    private EmployeeServiceAsync employeeService = GWT.create(EmployeeService.class);
 
     /**
      * This is the entry point method.
      */
     public void onModuleLoad() {
+        mainLayout.add(createStocksPanel());
+        mainLayout.add(createEmployeesPanel());
+        RootPanel.get("stockList").add(mainLayout);
+    }
+
+    private Panel createStocksPanel() {
         stocksFlexTable.setText(0, 0, "Symbol");
         stocksFlexTable.setText(0, 1, "Price");
         stocksFlexTable.setText(0, 2, "Change");
@@ -57,16 +74,13 @@ public class StockWatcher implements EntryPoint {
         addPanel.add(addStockButton);
         addPanel.setStyleName("addPanel");
 
-        // Main panel
         errorMsgLabel.setStyleName("errorMessage");
         errorMsgLabel.setVisible(false);
 
-        mainPanel.add(errorMsgLabel);
-        mainPanel.add(stocksFlexTable);
-        mainPanel.add(addPanel);
-        mainPanel.add(lastUpdatedLabel);
-
-        RootPanel.get("stockList").add(mainPanel);
+        stocksPanel.add(errorMsgLabel);
+        stocksPanel.add(stocksFlexTable);
+        stocksPanel.add(addPanel);
+        stocksPanel.add(lastUpdatedLabel);
 
         newSymbolTextBox.setFocus(true);
 
@@ -86,6 +100,30 @@ public class StockWatcher implements EntryPoint {
                 addStock();
             }
         });
+
+        return stocksPanel;
+    }
+
+    private Panel createEmployeesPanel() {
+        // Load employees button
+        employeesPanel.add(loadEmployeesButton);
+
+        // load employees click handler
+        loadEmployeesButton.addClickHandler(clickEvent -> {
+            employeeService.findAll(new AsyncCallback<List<Employee>>() {
+                @Override
+                public void onFailure(Throwable throwable) {
+                    // TODO
+                }
+
+                @Override
+                public void onSuccess(List<Employee> employees) {
+                    employees.forEach(System.out::println);
+                }
+            });
+        });
+
+        return employeesPanel;
     }
 
     private void refreshStockData() {

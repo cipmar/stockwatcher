@@ -9,9 +9,17 @@
         <servlet-name>stockPriceServiceImpl</servlet-name>
         <servlet-class>com.softwaredevelopmentstuff.stockwatcher.server.StockPriceServiceImpl</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>wmployeeServiceImpl</servlet-name>
+        <servlet-class>com.softwaredevelopmentstuff.stockwatcher.server.EmployeeServiceImpl</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>stockPriceServiceImpl</servlet-name>
         <url-pattern>/StockWatcher/stockPrices</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>wmployeeServiceImpl</servlet-name>
+        <url-pattern>/StockWatcher/employeeService</url-pattern>
     </servlet-mapping>
 
     <!-- Default page to serve -->
