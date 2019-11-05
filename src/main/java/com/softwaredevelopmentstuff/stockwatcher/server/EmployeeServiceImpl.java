@@ -22,7 +22,7 @@ public class EmployeeServiceImpl extends RemoteServiceServlet implements Employe
     }
 
     private Jdbi getJdbi() throws Exception {
-        String url = "jdbc:mysql://mysql-dev/test";
+        String url = "jdbc:mysql://localhost/test";
         Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
         Connection conn = DriverManager.getConnection(url, "root", "password");
         return Jdbi.create(conn);
